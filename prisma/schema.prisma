@@ -13,7 +13,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id String @id
-  name String
+model Usuario {
+  id    String  @id @default(uuid())
+  nome  String
+  email String  @unique
+  senha String
+  foto  String?
+  posts Post[] // Relacionamento 1:N (um usuário pode ter vários posts)
+
+  @@map("usuarios")
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  titulo    String
+  conteudo  String
+  createdAt DateTime @default(now())
+  usuarioId String // ID do usuário que criou o post
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+
+  @@map("posts")
 }
