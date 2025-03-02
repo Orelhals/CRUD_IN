@@ -17,4 +17,25 @@ export class PrismaUsersRepository implements UsersRepository{
           });
           return usuario;
     }
+
+    async findById(id: string) {
+        const usuario = await prisma.usuario.findUnique({
+            where: { id }
+        });
+        return usuario;
+    }
+
+    async update(id: string, data: Prisma.UsuarioUpdateInput) {
+        const usuario = await prisma.usuario.update({
+            where: { id },
+            data
+        });
+        return usuario;
+    }
+
+    async delete(id: string) {
+        await prisma.usuario.delete({
+            where: { id }
+        });
+    }
 }
