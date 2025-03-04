@@ -3,30 +3,18 @@ import { AuthenticateUseCase } from "@/use-cases/authenticate-use-case";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 
-export async function authenticate(request: FastifyRequest, reply: FastifyReply) {
-    const AuthenticateBodySchema = z.object({
-      email: z.string().email(),
-      senha: z.string().min(6),
-    });
+export async function refresh(request: FastifyRequest, reply: FastifyReply) {
+    await request.jwtVerify({onlyCookie: true});
   
-    const {email, senha} = AuthenticateBodySchema.parse(request.body);
-
-    
-    try {
-      const prismaUsersRepository = new PrismaUsersRepository();
-      const authenticateUseCase = new AuthenticateUseCase(prismaUsersRepository);
-      const {user} = await authenticateUseCase.execute(
-        { email, senha}
-      );
       const token = await reply.jwtSign({}, {
         sign: {
-          sub: user.id
+          sub: request.user.sub
         }
       })
 
       const refreshtoken = await reply.jwtSign({}, {
         sign: {
-          sub: user.id,
+          sub: request.user.sub,
           expiresIn: '7d'
         },
       })
@@ -41,7 +29,4 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
       })
       .send({token});
 
-    } catch (err) {
-        return reply.status(401).send()
-    }
-  }
+}

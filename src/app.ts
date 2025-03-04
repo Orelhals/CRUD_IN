@@ -1,12 +1,33 @@
+import "dotenv/config";
 import fastify from "fastify";
 import { ZodError } from "zod";
 import { appRoutes } from "./http/controllers/routes";
+import fastifyJwt from "@fastify/jwt";
+import { env } from "process";
+import fastifyCookie from "@fastify/cookie";
+import fastifyCors from "@fastify/cors";
 
 export const app = fastify();
 
-app.get("/home", (request, reply) => {
-  return { message: "Hello world" };
+app.register(fastifyCors, {
+  origin: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 })
+
+app.register(fastifyJwt, {
+  secret: env.JWT_SECRET!, 
+  cookie: {
+    cookieName: "refreshtoken",
+    signed: false,
+  },
+  sign: { 
+    expiresIn: "10m" 
+  }
+});
+
+app.register(fastifyCookie);
 
 app.register(appRoutes)
 
